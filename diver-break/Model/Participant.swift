@@ -7,8 +7,14 @@
 
 import Foundation
 
-struct Participant : Identifiable, Hashable {
-    let id = UUID()
+struct Participant : Identifiable, Equatable {
+    let id : UUID
     var name : String // MARK: - 수정 가능하게 할까 말까 일단 나중을 위해 할 수 있게 두자
-    var role : Role // MARK: - 얘도
+    var assignedRole : Role? // MARK: - nil 가능 -> 처음에 닉네임 받자마자 롤을 배정받는 건 아니니까
+    
+    init(id : UUID = UUID(), name: String = "", assignedRole: Role? = nil) {
+        self.id = id
+        self.name = name
+        self.assignedRole = assignedRole
+    }
 }

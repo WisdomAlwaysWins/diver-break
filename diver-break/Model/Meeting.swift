@@ -7,10 +7,3 @@
 
 import Foundation
 
-struct Meeting : Hashable {
-    var participants : [Participant]
-    
-    var participantsCount : Int {
-        participants.count
-    }
-}

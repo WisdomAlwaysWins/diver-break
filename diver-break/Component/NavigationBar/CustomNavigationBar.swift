@@ -18,18 +18,26 @@ struct CustomNavigationBar: View {
     let leftBtnType : NavigationBtnType?
     let rightBtnType : NavigationBtnType?
     
+    let leftBtnColor : Color
+    let rightBtnColor : Color
+    
     init(isDisplayLeftBtn: Bool = true,
          isDisplayRightBtn: Bool = true,
          leftBtnAction: @escaping () -> Void = {},
          rightBtnAction: @escaping () -> Void = {},
          leftBtnType: NavigationBtnType? = .help,
-         rightBtnType: NavigationBtnType? = .play) {
+         rightBtnType: NavigationBtnType? = .play,
+         leftBtnColor: Color = .diverIconGray,
+         rightBtnColor: Color = .diverIconGray
+    ) {
         self.isDisplayLeftBtn = isDisplayLeftBtn
         self.isDisplayRightBtn = isDisplayRightBtn
         self.leftBtnAction = leftBtnAction
         self.rightBtnAction = rightBtnAction
         self.leftBtnType = leftBtnType
         self.rightBtnType = rightBtnType
+        self.leftBtnColor = leftBtnColor
+        self.rightBtnColor = rightBtnColor
     }
     
     
@@ -41,7 +49,11 @@ struct CustomNavigationBar: View {
                     leftBtnAction()
                 } label: {
                     Image(systemName: type.iconName)
-                        .foregroundColor(.primary)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(leftBtnColor)
+                        .frame(minWidth: 44, minHeight: 44) // 🔥 터치 영역 확보
+                        .contentShape(Rectangle())
                 }
             }
             Spacer()
@@ -52,7 +64,11 @@ struct CustomNavigationBar: View {
                     rightBtnAction()
                 } label: {
                     Image(systemName: type.iconName)
-                        .foregroundColor(.primary)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(rightBtnColor)
+                        .frame(minWidth: 44, minHeight: 44) // 🔥 터치 영역 확보
+                        .contentShape(Rectangle())
                 }
             }
         }
