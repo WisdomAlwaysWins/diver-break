@@ -38,5 +38,5 @@ struct AppRootView: View {
 #Preview {
     AppRootView()
         .environmentObject(PathModel())
-        .environmentObject(ParticipantViewModel())
+        .environmentObject(ParticipantInputViewModel())
 }

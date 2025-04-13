@@ -11,13 +11,14 @@ import SwiftUI
 struct diver_breakApp: App {
     
     @StateObject var pathModel = PathModel()
-    @StateObject var participantViewModel = ParticipantViewModel()
+    @StateObject var participantViewModel = ParticipantInputViewModel()
     
     var body: some Scene {
         WindowGroup {
             AppRootView()
                 .environmentObject(pathModel)
                 .environmentObject(participantViewModel)
+                .environment(\.font, .custom("SFProRounded-Regular", size: 14)) 
         }
     }
 }

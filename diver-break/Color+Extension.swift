@@ -11,6 +11,7 @@ extension Color {
     static let diverWhite = Color("customWhite")
     static let diverBlack = Color("customBlack")
     static let diverBackgroundBlue = Color("customBackgroundBlue")
+    static let diverCardBackground = Color("customCardBackground")
     static let diverBlue = Color("customBlue")
     static let diverCoolGray = Color("customCoolGray")
     static let diverGray0 = Color("customGray0")
