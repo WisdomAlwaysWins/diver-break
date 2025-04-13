@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "diver-break-icon.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -12,6 +13,7 @@
           "value" : "dark"
         }
       ],
+      "filename" : "diver-break-icon 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -23,6 +25,7 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "diver-break-icon 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

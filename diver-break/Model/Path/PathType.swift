@@ -7,11 +7,11 @@
 
 import Foundation
 
-enum PathType : Hashable {
-    case homeView
-    case createGameView
-    case updateGameView
-    case handOutCardsView
-    case checkMyCardView
-    case descriptionView
+enum PathType: Hashable {
+    case participantInput
+    case roleReveal(participants: [Participant])
+    case main
+    case checkMyRole
+    case revealJoker
+    case updateParticipant
 }

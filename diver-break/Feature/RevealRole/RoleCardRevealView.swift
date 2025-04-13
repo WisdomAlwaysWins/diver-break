@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct RoleCardRevealView: View {
+    @EnvironmentObject var pathModel : PathModel
+    
     let participants: [Participant] // 역할 배정된 참가자 리스트
 
     @State private var currentIndex = 0
@@ -15,7 +17,6 @@ struct RoleCardRevealView: View {
     @State private var navigateToNext = false
 
     var body: some View {
-        let participant = participants[currentIndex]
 
         ZStack {
             Image("ocean")
@@ -23,62 +24,61 @@ struct RoleCardRevealView: View {
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-//                Spacer()
+            if participants.indices.contains(currentIndex) {
+                let participant = participants[currentIndex]
                 
-                FlipRoleCardView(
-                    participant: participant,
-                    isRevealed: $isRevealed
-                )
-                
-                buttonArea
-                
-                Spacer()
+                VStack(spacing: 24) {
+                    
+                    FlipRoleCardView(
+                        participant: participant,
+                        isRevealed: $isRevealed
+                    )
+                    
+                    buttonArea
+                    
+                    Spacer()
+                }
+                .padding()
+            } else {
+                VStack(spacing: 16) {
+                    Text("😵 역할 정보를 불러올 수 없어요.")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                }
             }
-            .padding()
-            
-            NavigationLink(destination: Text("진짜 홈화면"), isActive: $navigateToNext) {
-                EmptyView()
-            }
-            .hidden()
-            
-            
         }
-//        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            print("🧭 RoleCardRevealView로 전달된 participants 수: \(participants.count)")
+            participants.forEach { participant in
+                print(" - \(participant.name), 역할: \(participant.assignedRole?.name ?? "없음")")
+            }
+        }
     }
     
     @ViewBuilder
     private var buttonArea: some View {
+        
+        let action : () -> Void = currentIndex < participants.count - 1 ? handleNextParticipant : handleCompleteReveal
+        
         if isRevealed {
-            if currentIndex < participants.count - 1 {
-                Button("다음 사람") {
-                    handleNextParticipant()
-                }
-                .font(.headline)
-                .frame(maxWidth: 300)
-                .padding(.vertical, 20)
-                .background(Color.diverWhite)
-                .foregroundColor(.diverBlack)
-                .cornerRadius(40)
-            } else {
-                Button("모두 확인했어요") {
-                    handleCompleteReveal()
-                }
-                .font(.headline)
-                .frame(maxWidth: 300)
-                .padding(.vertical, 20)
-                .background(Color.diverWhite)
-                .foregroundColor(.diverBlack)
-                .cornerRadius(40)
+            Button(action : action) {
+                Text("확인")
+                    .font(.headline)
+                    .frame(maxWidth: 300)
+                    .padding(.vertical, 20)
+                    .background(Color.diverWhite)
+                    .foregroundColor(.diverBlack)
+                    .cornerRadius(40)
             }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+
         } else {
             Color.clear
                 .frame(height: 56)
                 .padding(.horizontal, 40)
         }
     }
-    
-    
 }
 
 extension RoleCardRevealView {
@@ -91,7 +91,7 @@ extension RoleCardRevealView {
 
     private func handleCompleteReveal() {
         withAnimation {
-            navigateToNext = true
+            pathModel.push(.main)
         }
     }
 }

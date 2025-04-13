@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Participant : Identifiable, Equatable {
+struct Participant : Identifiable, Hashable {
     let id : UUID
     var name : String // MARK: - 수정 가능하게 할까 말까 일단 나중을 위해 할 수 있게 두자
     var assignedRole : Role? // MARK: - nil 가능 -> 처음에 닉네임 받자마자 롤을 배정받는 건 아니니까

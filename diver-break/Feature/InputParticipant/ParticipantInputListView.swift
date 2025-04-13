@@ -9,33 +9,31 @@ import SwiftUI
 
 // MARK: - Main View
 struct ParticipantInputListView: View {
+    @EnvironmentObject var pathModel : PathModel
+    
     @StateObject private var viewModel = ParticipantViewModel()
     @FocusState private var focusedId: UUID?
     @State private var lastFocusedId: UUID?
     @State private var scrollTarget: UUID?
     
     @State private var isAlertPresented = false
-//    @State private var showDuplicateAlert = false
     @State private var navigateToReveal = false
     
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .top) {
-                backgroundView // MARK: - 전체 배경 및 키보드 내리기 처리
-                contentView // MARK: - 상단 설명 영역 + 참가자 리스트
-                
-                NavigationLink (
-                    destination : RoleCardRevealView(participants: viewModel.participants),
-                    isActive : $navigateToReveal
-                ) {
-                    EmptyView()
-                }
-                .hidden()
-            }
-            .alert("참가자 최소 3명 이상", isPresented: $isAlertPresented) {
-                Button("확인", role : .cancel) {}
+        ZStack(alignment: .top) {
+            backgroundView // MARK: - 전체 배경 및 키보드 내리기 처리
+            contentView // MARK: - 상단 설명 영역 + 참가자 리스트
+        }
+        .alert("입력 조건이 맞지 않습니다", isPresented: $isAlertPresented) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            if viewModel.validParticipantCount < 3 {
+                Text("참가자는 최소 3명 이상이어야 합니다.")
+            } else if viewModel.hasDuplicateNames {
+                Text("중복된 이름이 존재합니다. 이름을 수정해주세요.")
             }
         }
+        .navigationBarHidden(true)
     }
     
     // 전체 배경 영역 + 탭하면 키보드 내리기
@@ -52,16 +50,15 @@ struct ParticipantInputListView: View {
     // 네비게시션 바 + 상단 설명 영역 + 참가자 리스트 구성
     private var contentView : some View {
         VStack(alignment: .leading, spacing: 0) {
-
+            
             navigationBar
             
             headerArea
                 .padding(.horizontal)
                 .padding(.top, 20)
-
+            
             participantList
         }
-        .navigationBarHidden(true)
     }
     
     // 네이게이션 바
@@ -71,23 +68,23 @@ struct ParticipantInputListView: View {
             isDisplayRightBtn: true,
             leftBtnAction: { print("도움말 눌림")},
             rightBtnAction: {
+                
                 print("플레이 눌림")
+                
                 if viewModel.validParticipantCount < 3 {
                     isAlertPresented = true
+                } else if viewModel.hasDuplicateNames {
+                    isAlertPresented = true
                 } else {
-                    // MARK: - 확인용~~~~
-                    let names = viewModel.participants.map { $0.name }
-                    print("등록된 참가자들 \(names.count)명 : ")
-                    names.forEach { print("-\($0)") }
-                    
                     viewModel.assignRoleWithShark()
-                    navigateToReveal = true
+                    pathModel.push(.roleReveal(participants: viewModel.submittedUsers))
+                    print("🔍 제출된 유저: \(viewModel.submittedUsers.map { $0.name })")
                 }
             },
             leftBtnType: .help,
             rightBtnType: .play,
             leftBtnColor: .primary,
-            rightBtnColor: viewModel.validParticipantCount >= 3 ? .diverBlue : .primary
+            rightBtnColor: viewModel.validParticipantCount >= 3 && !viewModel.hasDuplicateNames ? .diverBlue : .primary
         )
         .padding(.horizontal,20)
         .padding(.top, 12)
@@ -126,7 +123,7 @@ struct ParticipantInputListView: View {
                         }
                         .listRowBackground(Color.clear)
                     }
-
+                    
                     // 새로운 이름 추가 버튼
                     Button(action: addParticipant) {
                         HStack {
@@ -205,7 +202,7 @@ struct ParticipantInputListView: View {
         }
         .padding(20)
     }
-        
+    
     // 참가자 입력 셀 하나 + 삭제 버튼
     struct ParticipantCellView: View {
         @Binding var participant: Participant
@@ -253,7 +250,7 @@ extension ParticipantInputListView {
             }
         }
     }
-
+    
     // 입력 완료 시 유효성 검사 후 포커스 검사
     // 아무것도 없으면 셀 삭제
     private func handleSubmit(index: Int, participant: Participant) {
@@ -270,4 +267,5 @@ extension ParticipantInputListView {
 
 #Preview {
     ParticipantInputListView()
+        .environmentObject(PathModel())
 }

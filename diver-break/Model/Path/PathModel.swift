@@ -13,4 +13,20 @@ class PathModel : ObservableObject {
     init(paths: [PathType] = []) {
         self.paths = paths
     }
+    
+    func push(_ path : PathType) {
+        paths.append(path)
+    }
+    
+    func pop() {
+        _ = paths.popLast()
+    }
+    
+    func popToRoot() {
+        paths = [.participantInput]
+    }
+    
+    func replace(with path: PathType) {
+        paths = [path]
+    }
 }

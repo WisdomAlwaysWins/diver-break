@@ -51,7 +51,7 @@ struct FlipRoleCardView: View {
                                 .foregroundColor(.white)
                         }
                     }
-                    .background(.red)
+//                    .background(.red)
                     .onLongPressGesture(minimumDuration: 2.0) {
                         print("PRESS")
                         withAnimation {
