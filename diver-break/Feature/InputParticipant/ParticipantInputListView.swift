@@ -94,57 +94,20 @@ private extension ParticipantInputListView {
         }
         .padding(20)
     }
-
+    
     var participantList: some View {
-        ScrollViewReader { proxy in
-            List {
-                Section(header: participantCountHeader) {
-                    ForEach(Array(zip(inputViewModel.tempParticipants.indices, $inputViewModel.tempParticipants)), id: \.1.id) { index, $participant in
-                        ParticipantCellView(
-                            participant: $participant,
-                            index: index,
-                            isDuplicate: inputViewModel.isNameDuplicated(at: index),
-                            onDelete: { inputViewModel.removeParticipant(at: IndexSet(integer: index)) }
-                        )
-                        .id(participant.id)
-                        .focused($focusedId, equals: participant.id)
-                        .onSubmit {
-                            handleSubmit(index: index, participant: participant)
-                        }
-                        .listRowBackground(Color.clear)
-                    }
-
-                    Button(action: addParticipant) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.diverBlue)
-                            Text("새로운 이름")
-                                .foregroundColor(.diverBlue)
-                                .fontWeight(.bold)
-                        }
-                        .font(.headline)
-                    }
-                    .listRowBackground(Color.clear)
-                }
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .background(Color.clear)
-            .padding(.horizontal, 20)
-            .onChange(of: scrollTarget) { id in
-                if let id = id {
-                    withAnimation {
-                        proxy.scrollTo(id, anchor: .center)
-                    }
-                }
-            }
-            .onChange(of: focusedId) { newValue in
-                if newValue == nil, let lastId = lastFocusedId {
-                    inputViewModel.removeIfEmpty(id: lastId)
-                }
-                lastFocusedId = newValue
-            }
-        }
+        ParticipantListView(
+            participants: $inputViewModel.tempParticipants,
+            isDuplicate: { inputViewModel.isNameDuplicated(at: $0) },
+            onSubmit: handleSubmit,
+            onDelete: { index in
+                inputViewModel.removeParticipant(at: IndexSet(integer: index))
+            },
+            onAdd: addParticipant,
+            focusedId: $focusedId,
+            scrollTarget: $scrollTarget,
+            lastFocusedId: $lastFocusedId
+        )
     }
 
     var participantCountHeader: some View {
