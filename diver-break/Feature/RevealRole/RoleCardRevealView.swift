@@ -119,8 +119,6 @@ private extension RoleCardRevealView {
 }
 
 struct RoleCardRevealViewPreviewWrapper: View {
-    @State private var revealed = false
-
     var body: some View {
         RoleCardRevealView(participants: [
             Participant(

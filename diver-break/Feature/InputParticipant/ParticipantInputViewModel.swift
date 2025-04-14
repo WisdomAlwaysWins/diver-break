@@ -8,9 +8,6 @@
 import Foundation
 import SwiftUI
 
-import Foundation
-import SwiftUI
-
 class ParticipantInputViewModel: ObservableObject {
     @Published var tempParticipants: [Participant] = [
         Participant(name: ""), Participant(name: ""), Participant(name: "")

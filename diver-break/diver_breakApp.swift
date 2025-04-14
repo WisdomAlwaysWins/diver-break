@@ -12,13 +12,15 @@ struct diver_breakApp: App {
     
     @StateObject var pathModel = PathModel()
     @StateObject var participantViewModel = ParticipantInputViewModel()
+    @StateObject var roleViewModel = RoleAssignmentViewModel()
     
     var body: some Scene {
         WindowGroup {
             AppRootView()
                 .environmentObject(pathModel)
                 .environmentObject(participantViewModel)
-                .environment(\.font, .custom("SFProRounded-Regular", size: 14)) 
+                .environmentObject(roleViewModel)
+                .environment(\.font, .custom("SFProRounded-Regular", size: 14))
         }
     }
 }
