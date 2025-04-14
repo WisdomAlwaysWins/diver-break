@@ -12,6 +12,5 @@ enum PathType: Hashable {
     case roleReveal(participants: [Participant])
     case main
     case checkMyRole
-    case revealJoker
     case updateParticipant
 }

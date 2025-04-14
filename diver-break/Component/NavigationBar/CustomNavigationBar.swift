@@ -48,14 +48,18 @@ struct CustomNavigationBar: View {
                 Button {
                     leftBtnAction()
                 } label: {
-                    Image(systemName: type.iconName)
-                        .resizable()
-                        .frame(width: 24, height: 24)
+                    Text(type.name)
                         .foregroundColor(leftBtnColor)
-                        .frame(minWidth: 44, minHeight: 44) // 🔥 터치 영역 확보
-                        .contentShape(Rectangle())
+//                    Image(systemName: type.iconName)
+//                        .resizable()
+//                        .frame(width: 24, height: 24)
+//                        .foregroundColor(leftBtnColor)
+//                        .frame(minWidth: 44, minHeight: 44)
+//                        .contentShape(Rectangle())
+                    
                 }
             }
+            
             Spacer()
             
             // MARK: - 오른쪽 버튼
@@ -63,16 +67,21 @@ struct CustomNavigationBar: View {
                 Button {
                     rightBtnAction()
                 } label: {
-                    Image(systemName: type.iconName)
-                        .resizable()
-                        .frame(width: 24, height: 24)
+                    Text(type.name)
                         .foregroundColor(rightBtnColor)
-                        .frame(minWidth: 44, minHeight: 44) // 🔥 터치 영역 확보
-                        .contentShape(Rectangle())
+                        
+                    
+//                    Image(systemName: type.iconName)
+//                        .resizable()
+//                        .frame(width: 24, height: 24)
+//                        .foregroundColor(rightBtnColor)
+//                        .frame(minWidth: 44, minHeight: 44) // 🔥 터치 영역 확보
+//                        .contentShape(Rectangle())
                 }
             }
         }
         .padding(.horizontal, 20)
+        .padding(.top, 12)
         .frame(height: 20)
 //        .background(Color.green)
     }

@@ -59,13 +59,11 @@ private extension ParticipantInputListView {
             isDisplayRightBtn: true,
             leftBtnAction: { print("도움말 눌림") },
             rightBtnAction: handlePlayTapped,
-            leftBtnType: .help,
+//            leftBtnType: .help,
+            leftBtnType: nil,
             rightBtnType: .play,
-            leftBtnColor: .primary,
-            rightBtnColor: canProceed ? .diverBlue : .primary
+            rightBtnColor: canProceed ? .diverBlue : .diverIconGray
         )
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
     }
 
     var headerArea: some View {

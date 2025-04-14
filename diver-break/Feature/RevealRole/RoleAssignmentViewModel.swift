@@ -17,6 +17,8 @@ class RoleAssignmentViewModel: ObservableObject {
     }
 
     func assignRoles(from tempParticipants: [Participant]) {
+        isJokerRevealed = false
+        
         participants = tempParticipants.filter {
             !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }

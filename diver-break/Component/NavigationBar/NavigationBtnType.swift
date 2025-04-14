@@ -11,7 +11,7 @@ enum NavigationBtnType : String {
     case back = "뒤로 가기"
     case home = "홈으로"
     case help = "도움말"
-    case play = "시작"
+    case play = "시작하기"
     
     var iconName : String {
         switch self {
@@ -22,7 +22,7 @@ enum NavigationBtnType : String {
         }
     }
     
-    var displayText : String {
+    var name : String {
         self.rawValue
     }
 }

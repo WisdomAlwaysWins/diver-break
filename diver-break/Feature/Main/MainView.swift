@@ -13,6 +13,18 @@ struct MainView: View {
 
     var body: some View {
         VStack(spacing: 32) {
+            
+            if roleViewModel.isJokerRevealed {
+                CustomNavigationBar(
+                    isDisplayLeftBtn: true,
+                    isDisplayRightBtn: true,
+                    leftBtnAction: { print("흠으로 버튼 눌림") },
+                    rightBtnAction: { print("헬프 버튼 눌림") },
+                    leftBtnType: .home,
+                    rightBtnType: .help
+                )
+            }
+
             titleSection
 
             if roleViewModel.isJokerRevealed {
@@ -40,8 +52,15 @@ struct MainView: View {
 //                .font(.system(size: 44, weight: .semibold))
                 .font(.custom("SFProRounded-Semibold", size: 44))
                 .foregroundColor(.diverBlack)
+                .onAppear {
+                    print("👉 참가자 수: \(roleViewModel.participants.count)")
+                    roleViewModel.participants.forEach {
+                        print("🔸 \($0.name): \($0.assignedRole?.name ?? "없음")")
+                    }
+                    print("🔍 조커 이름: \(roleViewModel.jokerName)")
+                }
 
-            Text(roleViewModel.isJokerRevealed ? "회의 끝을" : "회의에 집중!")
+            Text(roleViewModel.isJokerRevealed ? "회의 끄읕" : "회의에 집중!")
                 .font(.subheadline)
                 .foregroundColor(.diverBlack)
                 .padding(.top, 4)
@@ -71,7 +90,7 @@ struct MainView: View {
     }
 
     // MARK: - 조커 공개 후: 참가자 요약
-    private var revealedSummarySection: some View {
+    private var revealedSummarySection: some View { // revealedSummarySection
         let columns: [GridItem] = [
             GridItem(.flexible(), spacing: 20),
             GridItem(.flexible(), spacing: 20)
@@ -134,7 +153,6 @@ struct MainView: View {
             .cornerRadius(16)
             .shadow(radius: 1)
         }
-//        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -148,10 +166,9 @@ struct MainView: View {
         Participant(name: "Wish", assignedRole: RoleCardProvider.roles[5]),
         Participant(name: "Gigi", assignedRole: RoleCardProvider.roles[0]),
         Participant(name: "Gigi", assignedRole: RoleCardProvider.roles[0]),
-        Participant(name: "Gigi", assignedRole: RoleCardProvider.roles[0]),
     ]
-//    vm.isJokerRevealed = true
-    vm.isJokerRevealed = false
+    vm.isJokerRevealed = true
+//    vm.isJokerRevealed = false
 
     return MainView()
         .environmentObject(PathModel())

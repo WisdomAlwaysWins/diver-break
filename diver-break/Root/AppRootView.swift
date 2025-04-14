@@ -23,8 +23,6 @@ struct AppRootView: View {
                         MainView()
                     case .checkMyRole :
                         CheckMyRoleView()
-                    case .revealJoker :
-                        RevealJokerView()
                     case .updateParticipant :
                         UpdateParticipantView()
                         
