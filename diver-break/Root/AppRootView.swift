@@ -22,9 +22,9 @@ struct AppRootView: View {
                     case .main :
                         MainView()
                     case .checkMyRole :
-                        CheckMyRoleView()
-                    case .updateParticipant :
-                        UpdateParticipantView()
+                        CheckRolesView()
+                    case .updateParticipant(let existing) :
+                        UpdateParticipantView(existingParticipants: existing)
                         
                     }
                 }
@@ -37,4 +37,5 @@ struct AppRootView: View {
     AppRootView()
         .environmentObject(PathModel())
         .environmentObject(ParticipantInputViewModel())
+        .environmentObject(RoleAssignmentViewModel())
 }

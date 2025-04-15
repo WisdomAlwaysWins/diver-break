@@ -19,7 +19,6 @@ struct RoleCardRevealView: View {
     
     var body: some View {
         ZStack {
-            // 바다 배경
             background
             
             if participants.indices.contains(currentIndex) {
@@ -93,7 +92,6 @@ private extension RoleCardRevealView {
                     .foregroundColor(Color.diverBlack)
                     .cornerRadius(40)
             }
-            .buttonStyle(.plain)
             .contentShape(Rectangle())
         } else {
             Color.clear
@@ -114,9 +112,9 @@ private extension RoleCardRevealView {
     
     func handleCompleteReveal() {
         withAnimation {
-            roleViewModel.participants = participants // ✅ participants 저장
+            roleViewModel.appendNewParticipants(participants) // ✅ 안전하게 append
             roleViewModel.isJokerRevealed = false
-            pathModel.push(.main)
+            pathModel.resetTo(.main)
         }
     }
     

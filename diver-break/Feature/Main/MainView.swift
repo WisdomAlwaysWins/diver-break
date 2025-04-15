@@ -18,7 +18,7 @@ struct MainView: View {
                 CustomNavigationBar(
                     isDisplayLeftBtn: true,
                     isDisplayRightBtn: true,
-                    leftBtnAction: { print("흠으로 버튼 눌림") },
+                    leftBtnAction: { pathModel.popToRoot() },
                     rightBtnAction: { print("헬프 버튼 눌림") },
                     leftBtnType: .home,
                     rightBtnType: .help
@@ -71,20 +71,20 @@ struct MainView: View {
     // MARK: - 조커 공개 전: 4개 버튼
     private var actionButtonGrid: some View {
         LazyVGrid(columns: [GridItem(), GridItem()], spacing: 20) {
-            mainButton(title: "역할 확인하기", icon: "person.text.rectangle") {
+            mainButton(title: "역할 확인하기", icon: "🪪") { // TODO: - 버튼으로 구현해서 long press
                 pathModel.push(.checkMyRole)
             }
 
-            mainButton(title: "회의 삭제하기", icon: "trash") {
+            mainButton(title: "회의 삭제하기", icon: "🗑️") { // 완성
                 pathModel.popToRoot()
             }
 
-            mainButton(title: "조커 공개하기", icon: "rectangle.stack.person.crop") {
+            mainButton(title: "조커 공개하기", icon: "🃏") { // 완성 (도움말은 아직)
                 roleViewModel.isJokerRevealed = true
             }
 
-            mainButton(title: "인원 추가하기", icon: "plus") {
-                pathModel.push(.updateParticipant)
+            mainButton(title: "인원 추가하기", icon: "➕") { // TODO: - 역할 배부 + 기존 participants에 추가 로직 필요
+                pathModel.push(.updateParticipant(existing: roleViewModel.participants))
             }
         }
     }
@@ -137,15 +137,13 @@ struct MainView: View {
     // MARK: - 공통 버튼 스타일
     private func mainButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 40) {
                 Text(title)
                     .font(.headline)
-                    .multilineTextAlignment(.center)
-
-                Image(systemName: icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 36, height: 36)
+                    .foregroundColor(.customBlack)
+                
+                Text(icon)
+                    .font(.largeTitle)
             }
             .padding()
             .frame(maxWidth: .infinity, minHeight: 180)
@@ -167,8 +165,8 @@ struct MainView: View {
         Participant(name: "Gigi", assignedRole: RoleCardProvider.roles[0]),
         Participant(name: "Gigi", assignedRole: RoleCardProvider.roles[0]),
     ]
-    vm.isJokerRevealed = true
-//    vm.isJokerRevealed = false
+//    vm.isJokerRevealed = true
+    vm.isJokerRevealed = false
 
     return MainView()
         .environmentObject(PathModel())

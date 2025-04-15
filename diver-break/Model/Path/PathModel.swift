@@ -29,4 +29,8 @@ class PathModel : ObservableObject {
     func replace(with path: PathType) {
         paths = [path]
     }
+    
+    func resetTo(_ path: PathType) {
+        paths = [path] // 현재 스택 전체 초기화 후 단 하나만 push
+    }
 }

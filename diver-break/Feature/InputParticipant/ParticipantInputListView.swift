@@ -109,17 +109,6 @@ private extension ParticipantInputListView {
             lastFocusedId: $lastFocusedId
         )
     }
-
-    var participantCountHeader: some View {
-        HStack {
-            Spacer()
-            Text("현재 \(inputViewModel.validParticipantCount)명 참여")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.diverBlack)
-                .padding(.vertical, 4)
-        }
-    }
 }
 
 // MARK: - Logic

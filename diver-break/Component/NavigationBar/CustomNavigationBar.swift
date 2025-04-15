@@ -81,9 +81,9 @@ struct CustomNavigationBar: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .frame(height: 20)
-//        .background(Color.green)
+        .padding(.vertical, 20)
+//        .frame(height: 20)
+        .background(Color.green)
     }
 }
 

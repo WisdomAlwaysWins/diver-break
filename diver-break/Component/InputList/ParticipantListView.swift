@@ -67,13 +67,16 @@ struct ParticipantListView: View {
 
     private var participantCountHeader: some View {
         HStack {
+            HStack(spacing: 0) {
+                Text("현재")
+                Text(" \(validParticipantCount)")
+                    .foregroundColor(.diverBlue)
+                Text("명 참여")
+            }
             Spacer()
-            Text("현재 \(validParticipantCount)명 참여")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.diverBlack)
-                .padding(.vertical, 4)
-        }
+        }.font(.subheadline)
+            .fontWeight(.medium)
+            .padding(.vertical, 4)
     }
 
     private var validParticipantCount: Int {
