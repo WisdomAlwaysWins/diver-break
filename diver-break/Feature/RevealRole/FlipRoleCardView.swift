@@ -9,6 +9,11 @@ import SwiftUI
 
 import SwiftUI
 
+/*
+    MARK: - 참가자 역할 공개 카드
+    - 2초 길게 누르면 역할 이미지로 전환
+*/
+
 struct FlipRoleCardView: View {
     let participant: Participant
     @Binding var isRevealed: Bool

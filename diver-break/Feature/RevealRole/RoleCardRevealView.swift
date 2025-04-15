@@ -7,15 +7,21 @@
 
 import SwiftUI
 
-// MARK: - 역할 카드 공개 뷰
+/*
+    MARK: - 참가자들의 역할 카드 공개 뷰
+    - 참가자들을 순차적으로 돌아가며 카드를 보여줌.
+    - 확인 버튼을 눌러 다음 참가자로 이동
+    - 마지막 참가자까지 끝마녀 메인 뷰로 이동
+*/
+
 struct RoleCardRevealView: View {
     @EnvironmentObject var pathModel: PathModel
     @EnvironmentObject var roleViewModel: RoleAssignmentViewModel
     
-    let participants: [Participant]
+    let participants: [Participant] // 전달된 참가자 리스트
     
-    @State private var currentIndex = 0
-    @State private var isRevealed = false
+    @State private var currentIndex = 0 // 현재 공개 중인 참가자 인덱스
+    @State private var isRevealed = false // 현재 참가자의 역할 공개 여부
     
     var body: some View {
         ZStack {
@@ -29,17 +35,6 @@ struct RoleCardRevealView: View {
         }
         .onAppear(perform: printParticipants)
     }
-    
-    var navigationBar: some View {
-        CustomNavigationBar(
-            isDisplayLeftBtn: true,
-            isDisplayRightBtn: true,
-            leftBtnAction: { print("도움말 눌림") },
-            leftBtnType: .back,
-            rightBtnType: nil
-            //            rightBtnColor: canProceed ? .diverBlue : .diverIconGray
-        )
-    }
 }
 
 // MARK: - View 구성
@@ -51,6 +46,7 @@ private extension RoleCardRevealView {
             .ignoresSafeArea()
     }
     
+    // 현재 참가자의 FlipCard 및 버튼
     var content: some View {
         let participant = participants[currentIndex]
         
@@ -70,16 +66,16 @@ private extension RoleCardRevealView {
         .padding(.horizontal)
     }
     
-    var errorMessage: some View {
+    var errorMessage: some View { // TEST 에러 메시지
         VStack(spacing: 16) {
-            Text("😵 역할 정보를 불러올 수 없어요.")
+            Text("역할 정보를 불러올 수 없어요.")
                 .font(.headline)
                 .foregroundColor(.red)
         }
     }
     
-    @ViewBuilder
-    var buttonArea: some View {
+    @ViewBuilder // TODO: - ???
+    var buttonArea: some View { // 확인 버튼 또는 placeholder
         let action: () -> Void = currentIndex < participants.count - 1 ? handleNextParticipant : handleCompleteReveal
         
         if isRevealed {
@@ -103,22 +99,23 @@ private extension RoleCardRevealView {
 
 // MARK: - 로직
 private extension RoleCardRevealView {
-    func handleNextParticipant() {
+    
+    func handleNextParticipant() { // 다음 참가자 보기
         withAnimation {
             currentIndex += 1
             isRevealed = false
         }
     }
     
-    func handleCompleteReveal() {
+    func handleCompleteReveal() { // 역할 공개 완료 후, 메인 화면으로 이동
         withAnimation {
-            roleViewModel.appendNewParticipants(participants) // ✅ 안전하게 append
+            roleViewModel.appendNewParticipants(participants)
             roleViewModel.isJokerRevealed = false
             pathModel.resetTo(.main)
         }
     }
     
-    func printParticipants() {
+    func printParticipants() { // TEST 디버깅용
         print("🧭 RoleCardRevealView로 전달된 participants 수: \(participants.count)")
         participants.forEach { participant in
             print(" - \(participant.name), 역할: \(participant.assignedRole?.name ?? "없음")")

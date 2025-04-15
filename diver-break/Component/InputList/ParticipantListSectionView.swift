@@ -7,60 +7,62 @@
 
 import SwiftUI
 
+/*
+    MARK: - 참가자 리스트의 섹션을 구성하는 뷰
+    - 각 참가자 항목은 ParticipantCellView로 구성함
+    - 포커스, 중복 체크, 삭제, 제출 등의 기능은 외부에서 주입받아 처리
+*/
+
 struct ParticipantListSectionView: View {
-    @Binding var participants: [Participant]
-    var focusedId: FocusState<UUID?>.Binding
-    var isDuplicate: (Int) -> Bool
+    
+    @ObservedObject var participantViewModel: ParticipantViewModel
+    
+    var focusedId: FocusState<UUID?>.Binding // 포커스 상태 바인딩 (각 셀의 TextField 포커스 관리용)
     var onSubmit: (Int, Participant) -> Void
-    var onDelete: (Int) -> Void
 
     var body: some View {
-        ForEach(Array(zip(participants.indices, $participants)), id: \.1.id) { index, $participant in
+        ForEach(Array(participantViewModel.participants.enumerated()), id: \.1.id) { index, participant in
             ParticipantCellView(
-                participant: $participant,
+                participantViewModel: participantViewModel,
                 index: index,
-                isDuplicate: isDuplicate(index),
-                onDelete: {
-                    onDelete(index)
-                }
+                onSubmit: {
+                    onSubmit(index, participantViewModel.participants[index])
+                },
+                focusedId: focusedId,
+                id: participant.id
             )
             .id(participant.id)
-            .focused(focusedId, equals: participant.id)
-            .onSubmit {
-                onSubmit(index, participant)
-            }
             .listRowBackground(Color.clear)
         }
     }
 }
 
 #Preview {
-    ParticipantListPreviewWrapper()
-}
+    struct ParticipantListSectionPreviewWrapper: View {
+        @StateObject private var viewModel = ParticipantViewModel(
+            participants: [
+                Participant(name: "HappyJay"),
+                Participant(name: "Gigi"),
+                Participant(name: "Moo")
+            ],
+            mode: .input
+        )
 
-struct ParticipantListPreviewWrapper: View {
-    @State private var participants: [Participant] = [
-        Participant(name: "HappyJay"),
-        Participant(name: "Gigi"),
-        Participant(name: "Moo")
-    ]
-    
-    @FocusState private var focusedId: UUID?
-    
-    var body: some View {
-        List {
-            ParticipantListSectionView(
-                participants: $participants,
-                focusedId: $focusedId,
-                isDuplicate: { _ in false }, // 여기선 중복 체크 생략
-                onSubmit: { index, participant in
-                    print("✅ Submitted: \(participant.name) at \(index)")
-                },
-                onDelete: { index in
-                    participants.remove(at: index)
-                }
-            )
+        @FocusState private var focusedId: UUID?
+
+        var body: some View {
+            List {
+                ParticipantListSectionView(
+                    participantViewModel: viewModel,
+                    focusedId: $focusedId,
+                    onSubmit: { index, participant in
+                        print("✅ Submitted: \(participant.name) at index \(index)")
+                    }
+                )
+            }
+            .listStyle(.plain)
         }
-        .listStyle(.plain)
     }
+
+    return ParticipantListSectionPreviewWrapper()
 }

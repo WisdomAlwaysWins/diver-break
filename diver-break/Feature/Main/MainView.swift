@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+/*
+    MARK: - 메인 화면
+    - 조커 공개 전 : 4가지 기능 버튼
+    - 조커 공개 후 : 참가자 요약 카드 모음집
+*/
+
 struct MainView: View {
     @EnvironmentObject var pathModel: PathModel
     @EnvironmentObject var roleViewModel: RoleAssignmentViewModel
@@ -14,7 +20,7 @@ struct MainView: View {
     var body: some View {
         VStack(spacing: 32) {
             
-            if roleViewModel.isJokerRevealed {
+            if roleViewModel.isJokerRevealed { // 조커가 까져야 navbar 보이게
                 CustomNavigationBar(
                     isDisplayLeftBtn: true,
                     isDisplayRightBtn: true,
@@ -27,8 +33,8 @@ struct MainView: View {
 
             titleSection
 
-            if roleViewModel.isJokerRevealed {
-                revealedSummarySection
+            if roleViewModel.isJokerRevealed { // 조커 공개 여부에 따라 다른 뷰를 보이게
+                revealedSummary
             } else {
                 actionButtonGrid
             }
@@ -41,7 +47,7 @@ struct MainView: View {
         .navigationBarBackButtonHidden(true)
     }
 
-    // MARK: - 타이틀 영역
+    // 상단 타이틀
     private var titleSection: some View {
         VStack(spacing: 20) {
             Text("오늘의 조커")
@@ -52,13 +58,6 @@ struct MainView: View {
 //                .font(.system(size: 44, weight: .semibold))
                 .font(.custom("SFProRounded-Semibold", size: 44))
                 .foregroundColor(.diverBlack)
-                .onAppear {
-                    print("👉 참가자 수: \(roleViewModel.participants.count)")
-                    roleViewModel.participants.forEach {
-                        print("🔸 \($0.name): \($0.assignedRole?.name ?? "없음")")
-                    }
-                    print("🔍 조커 이름: \(roleViewModel.jokerName)")
-                }
 
             Text(roleViewModel.isJokerRevealed ? "회의 끄읕" : "회의에 집중!")
                 .font(.subheadline)
@@ -68,7 +67,7 @@ struct MainView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - 조커 공개 전: 4개 버튼
+    // 조커 공개 전 4개 버튼
     private var actionButtonGrid: some View {
         LazyVGrid(columns: [GridItem(), GridItem()], spacing: 20) {
             mainButton(title: "역할 확인하기", icon: "🪪") { // TODO: - 버튼으로 구현해서 long press
@@ -89,8 +88,8 @@ struct MainView: View {
         }
     }
 
-    // MARK: - 조커 공개 후: 참가자 요약
-    private var revealedSummarySection: some View { // revealedSummarySection
+    // 조커 공개 후 : 참가자 요약
+    private var revealedSummary: some View { // revealedSummarySection
         let columns: [GridItem] = [
             GridItem(.flexible(), spacing: 20),
             GridItem(.flexible(), spacing: 20)
@@ -134,7 +133,7 @@ struct MainView: View {
         }
     }
 
-    // MARK: - 공통 버튼 스타일
+    // 버튼 4개의 공통 스타일
     private func mainButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 40) {

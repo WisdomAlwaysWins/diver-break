@@ -10,17 +10,20 @@ import SwiftUI
 struct UpdateParticipantView: View {
     @EnvironmentObject var pathModel: PathModel
     @EnvironmentObject var roleViewModel: RoleAssignmentViewModel
-    @StateObject private var viewModel: UpdateParticipantViewModel
+    @StateObject private var participantViewModel: ParticipantViewModel
     
-
     @FocusState private var focusedId: UUID?
     @State private var lastFocusedId: UUID?
     @State private var scrollTarget: UUID?
     @State private var isExpanded = false
     @State private var isAlertPresented = false
+    @State private var validationResult: SubmissionValidationResult? = nil
 
     init(existingParticipants: [Participant]) {
-        _viewModel = StateObject(wrappedValue: UpdateParticipantViewModel(existingParticipants: existingParticipants))
+        _participantViewModel = StateObject(wrappedValue: ParticipantViewModel(
+            existingParticipants: existingParticipants,
+            mode: .update
+        ))
     }
 
     var body: some View {
@@ -28,12 +31,17 @@ struct UpdateParticipantView: View {
             backgroundView
             contentView
         }
-        .alert("입력 조건이 맞지 않습니다", isPresented: $isAlertPresented) {
-            Button("확인", role: .cancel) {}
+        .alert("입력 조건이 맞지 않습니다", isPresented: .constant(validationResult != nil)) {
+            Button("확인", role: .cancel) {
+                validationResult = nil
+            }
         } message: {
             Text(alertMessage)
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            print("▶️ 참가자 수: \(participantViewModel.participants.count)")
+        }
     }
 }
 
@@ -67,7 +75,8 @@ private extension UpdateParticipantView {
             leftBtnAction: { pathModel.pop() },
             rightBtnAction: handleSubmit,
             leftBtnType: .back,
-            rightBtnType: .play
+            rightBtnType: .play,
+            rightBtnColor: .diverBlue
         )
     }
 
@@ -88,7 +97,7 @@ private extension UpdateParticipantView {
             }) {
                 HStack(spacing: 8) {
 
-                    Text("기존 참여자 \(viewModel.existingParticipants.count)명")
+                    Text("기존 참여자 \(participantViewModel.existingParticipants.count)명")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.gray)
@@ -108,11 +117,11 @@ private extension UpdateParticipantView {
 
             if isExpanded {
                 List {
-                    ForEach(viewModel.existingParticipants) { participant in
+                    ForEach(participantViewModel.existingParticipants) { participant in
                         Text(participant.name)
                     }
                 }
-                .frame(height: CGFloat(viewModel.existingParticipants.count * 44)) // 높이 고정 (줄당 대략 44)
+                .frame(height: CGFloat(participantViewModel.existingParticipants.count * 44)) // 높이 고정 (줄당 대략 44)
                 .listStyle(.plain)
                 .scrollDisabled(true)
 //                .transition(.opacity.combined(with: .move(edge: .top)))
@@ -122,19 +131,7 @@ private extension UpdateParticipantView {
 
     var participantList: some View {
         ParticipantListView(
-            participants: $viewModel.newParticipants,
-            isDuplicate: { viewModel.isNameDuplicated(at: $0) },
-            onSubmit: handleSubmitField,
-            onDelete: viewModel.removeParticipant,
-            onAdd: {
-                viewModel.addParticipant()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    if let last = viewModel.newParticipants.last {
-                        focusedId = last.id
-                        scrollTarget = last.id
-                    }
-                }
-            },
+            participantViewModel: participantViewModel,
             focusedId: $focusedId,
             scrollTarget: $scrollTarget,
             lastFocusedId: $lastFocusedId
@@ -142,58 +139,35 @@ private extension UpdateParticipantView {
     }
 
     var alertMessage: String {
-        let validNewParticipants = viewModel.newParticipants.filter {
-            !$0.name.trimmingCharacters(in: .whitespaces).isEmpty
-        }
-
-        if validNewParticipants.isEmpty {
+        switch validationResult {
+        case .notEnough:
             return "참가자를 한 명 이상 추가해주세요."
-        } else {
+        case .duplicated:
             return "중복된 이름이 존재합니다. 이름을 수정해주세요."
+        default:
+            return ""
         }
     }
+
     
     func handleSubmit() {
-        let trimmedNew = viewModel.newParticipants
-            .map { $0.name.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
+        switch participantViewModel.validateSubmission() {
+        case .valid:
+            print("💾 기존 인원: \(roleViewModel.participants.map { $0.name })")
+            print("➕ 추가 인원: \(participantViewModel.participants.map { $0.name })")
 
-        let existingNames = viewModel.existingParticipants
-            .map { $0.name.trimmingCharacters(in: .whitespaces) }
+            roleViewModel.assignRolesToNewParticipants(participantViewModel.participants)
 
-        let duplicatesWithExisting = trimmedNew.filter { existingNames.contains($0) }
-        let hasInternalDuplicates = Set(trimmedNew).count != trimmedNew.count
+            let newAssigned = roleViewModel.participants.filter { new in
+                participantViewModel.participants.contains { $0.name == new.name }
+            }
 
-        guard !trimmedNew.isEmpty, duplicatesWithExisting.isEmpty, !hasInternalDuplicates else {
-            isAlertPresented = true
-            return
-        }
+            pathModel.push(.roleReveal(participants: newAssigned))
 
-        print("💾 기존 인원: \(roleViewModel.participants.map { $0.name })")
-        print("➕ 추가 인원: \(viewModel.newParticipants.map { $0.name })")
-
-        roleViewModel.assignRolesToNewParticipants(viewModel.newParticipants)
-        
-        let newAssigned = roleViewModel.participants.filter { new in
-            viewModel.newParticipants.contains(where: { $0.name == new.name })
-        }
-
-        pathModel.push(.roleReveal(participants: newAssigned))
-
-//        pathModel.push(.main)
-    }
-    
-
-    func handleSubmitField(index: Int, participant: Participant) {
-        let trimmed = participant.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty {
-            viewModel.removeParticipant(at: index)
-        } else if let nextId = viewModel.nextParticipantId(after: participant.id) {
-            focusedId = nextId
-            scrollTarget = nextId
+        case .notEnough, .duplicated:
+            validationResult = participantViewModel.validateSubmission()
         }
     }
-    
 }
 
 #Preview {

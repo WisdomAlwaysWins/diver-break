@@ -7,18 +7,25 @@
 
 import SwiftUI
 
+/*
+    MARK: - 참가자의 역할 카드를 보여주는 개별 카드 뷰
+    - 길게 누르면 역할 정보가 표시됨
+    - 공개 중인 카드 상태는 relveadId로 관리
+*/
+
 struct CheckMyCardView : View {
-    let participant: Participant
-    @Binding var revealedId: UUID?
+    let participant: Participant // 지금 카드의 참가자 정보
+    
+    @Binding var revealedId: UUID? // 현재 공개된 카드 ID (하나만 공개되도록!)
 
     var body: some View {
-        let isRevealing = revealedId == participant.id
+        let isRevealing = revealedId == participant.id // 지금 이 참가자의 카드가 공개 상태인지 체크
 
         VStack(alignment: .leading, spacing: 8) {
             Text(participant.name)
                 .font(.headline)
 
-            if isRevealing, let role = participant.assignedRole {
+            if isRevealing, let role = participant.assignedRole { // 공개되어있으면 역할을 표시
                 Text(role.name)
                     .font(.subheadline)
                     .foregroundColor(.diverBlue)
@@ -39,11 +46,11 @@ struct CheckMyCardView : View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.diverGray0, lineWidth: 1)
         )
-        .onLongPressGesture(minimumDuration: 4.0, pressing: { isPressing in
+        .onLongPressGesture(minimumDuration: 2.0, pressing: { isPressing in
             if isPressing {
-                revealedId = participant.id
+                revealedId = participant.id // 길게 누르는 중 -> 공개
             } else {
-                // 손 뗄 때만 초기화
+                // 손 뗄 때 -> 숨김
                 if revealedId == participant.id {
                     revealedId = nil
                 }

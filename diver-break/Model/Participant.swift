@@ -18,3 +18,13 @@ struct Participant : Identifiable, Hashable {
         self.assignedRole = assignedRole
     }
 }
+
+extension Participant {
+    var trimmedName : String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    var isValid : Bool {
+        !trimmedName.isEmpty
+    }
+}

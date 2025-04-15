@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+/*
+    MARK: - 커스텀 네비게이션 바 컴포넌트
+    - 왼쪽/ 오른쪽 버튼 각각의 표시 여부 및 타입 지정
+    - 버튼 타입은 NavigationBtnType에 열거형으로 정의해둠
+*/
+
 struct CustomNavigationBar: View {
     
     let isDisplayLeftBtn : Bool
@@ -50,13 +56,6 @@ struct CustomNavigationBar: View {
                 } label: {
                     Text(type.name)
                         .foregroundColor(leftBtnColor)
-//                    Image(systemName: type.iconName)
-//                        .resizable()
-//                        .frame(width: 24, height: 24)
-//                        .foregroundColor(leftBtnColor)
-//                        .frame(minWidth: 44, minHeight: 44)
-//                        .contentShape(Rectangle())
-                    
                 }
             }
             
@@ -69,21 +68,12 @@ struct CustomNavigationBar: View {
                 } label: {
                     Text(type.name)
                         .foregroundColor(rightBtnColor)
-                        
-                    
-//                    Image(systemName: type.iconName)
-//                        .resizable()
-//                        .frame(width: 24, height: 24)
-//                        .foregroundColor(rightBtnColor)
-//                        .frame(minWidth: 44, minHeight: 44) // 🔥 터치 영역 확보
-//                        .contentShape(Rectangle())
                 }
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
-//        .frame(height: 20)
-        .background(Color.green)
+        //.background(Color.green) // 👀 TEST 
     }
 }
 

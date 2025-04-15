@@ -8,48 +8,35 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var pathModel : PathModel
+    
     var body: some View {
-        NavigationView {
-            VStack {
-                NavigationLink("기본 상단바 화면", destination: DefaultTopBarView())
-                NavigationLink("커스텀 상단바 화면", destination: CustomTopBarView())
-            }
-        }
-    }
-}
-
-struct DefaultTopBarView: View {
-    var body: some View {
-        Text("기본 상단바 사용")
-            .navigationBarTitle("기본", displayMode: .inline)
-            .navigationBarItems(trailing: Button("추가") {})
-    }
-}
-
-struct CustomTopBarView: View {
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button(action: { /* 뒤로가기 */ }) {
-                    Image(systemName: "chevron.left")
+        NavigationStack(path: $pathModel.paths) {
+            ParticipantInputListView() // 첫 시작 화면
+                .navigationDestination(for: PathType.self) { path in
+                    switch path {
+                    case .participantInput :
+                        ParticipantInputListView()
+                    case .roleReveal(let participants) :
+                        RoleCardRevealView(participants: participants)
+                    case .main :
+                        MainView()
+                    case .checkMyRole :
+                        CheckRolesView()
+                    case .updateParticipant(let existing) :
+                        UpdateParticipantView(existingParticipants: existing)
+                        
+                    }
                 }
-                Spacer()
-                Text("커스텀 타이틀")
-                    .font(.headline)
-                Spacer()
-                Button("편집") {}
-            }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-
-            Spacer()
-            Text("이 화면은 커스텀 상단바")
-            Spacer()
         }
-        .navigationBarHidden(true) // ✅ 반드시 숨겨줘야 겹치지 않아!
+        .navigationBarBackButtonHidden(true)
     }
 }
+
 
 #Preview {
     ContentView()
+        .environmentObject(PathModel())
+        .environmentObject(ParticipantViewModel())
+        .environmentObject(RoleAssignmentViewModel())
 }

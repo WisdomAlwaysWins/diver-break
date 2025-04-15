@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+/*
+    MARK: - 참가자가 본인의 역할 카드를 다시 확인할 수 있는 화면
+    - 역할 리스트를 2열 그리드로 구성
+    - 각 카드는 Long Press로 볼 수 있음
+    - 상단에 custom navbar를 포함
+*/
+
 struct CheckRolesView: View {
     @EnvironmentObject var pathModel: PathModel
     @EnvironmentObject var roleViewModel : RoleAssignmentViewModel
@@ -18,7 +25,7 @@ struct CheckRolesView: View {
             backgroundView
             contentView
         }
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true) // 기본 back 버튼 숨기기
     }
 }
 
@@ -30,8 +37,8 @@ private extension CheckRolesView {
             .ignoresSafeArea()
     }
 
+    // 네비게이션 바 + 역할 카드 리스트 구성
     var contentView: some View {
-        
         VStack(alignment: .leading, spacing: 0) {
             navigationBar
 
@@ -51,6 +58,7 @@ private extension CheckRolesView {
         .padding(.bottom, 20)
     }
 
+    // 커스텀 네비게이션 바 (only 뒤로 가기)
     var navigationBar: some View {
         CustomNavigationBar(
             isDisplayRightBtn: false,
