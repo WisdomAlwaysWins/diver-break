@@ -37,6 +37,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(PathModel())
-        .environmentObject(ParticipantViewModel())
+//        .environmentObject(ParticipantViewModel())
         .environmentObject(RoleAssignmentViewModel())
 }

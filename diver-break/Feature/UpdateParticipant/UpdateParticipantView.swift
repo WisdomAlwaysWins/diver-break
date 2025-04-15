@@ -11,12 +11,11 @@ struct UpdateParticipantView: View {
     @EnvironmentObject var pathModel: PathModel
     @EnvironmentObject var roleViewModel: RoleAssignmentViewModel
     @StateObject private var participantViewModel: ParticipantViewModel
-    
+
     @FocusState private var focusedId: UUID?
     @State private var lastFocusedId: UUID?
     @State private var scrollTarget: UUID?
     @State private var isExpanded = false
-    @State private var isAlertPresented = false
     @State private var validationResult: SubmissionValidationResult? = nil
 
     init(existingParticipants: [Participant]) {
@@ -39,12 +38,10 @@ struct UpdateParticipantView: View {
             Text(alertMessage)
         }
         .navigationBarBackButtonHidden(true)
-        .onAppear {
-            print("▶️ 참가자 수: \(participantViewModel.participants.count)")
-        }
     }
 }
 
+// MARK: - View 구성
 private extension UpdateParticipantView {
     var backgroundView: some View {
         Color(.systemBackground)
@@ -90,48 +87,45 @@ private extension UpdateParticipantView {
 
     var existingList: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Button(action: {
-                withAnimation {
-                    isExpanded.toggle()
-                }
-            }) {
-                HStack(spacing: 8) {
-
+            Button(action: { withAnimation { isExpanded.toggle() } }) {
+                HStack {
                     Text("기존 참여자 \(participantViewModel.existingParticipants.count)명")
                         .font(.subheadline)
-                        .fontWeight(.medium)
                         .foregroundColor(.gray)
-                    
                     Spacer()
-                    
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                         .foregroundColor(.gray)
-                        .frame(width: 12)
-                    
-                    
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 20)
-                .contentShape(Rectangle())
             }
 
             if isExpanded {
-                List {
-                    ForEach(participantViewModel.existingParticipants) { participant in
-                        Text(participant.name)
-                    }
+                List(participantViewModel.existingParticipants) { participant in
+                    Text(participant.name)
                 }
-                .frame(height: CGFloat(participantViewModel.existingParticipants.count * 44)) // 높이 고정 (줄당 대략 44)
+                .frame(height: CGFloat(participantViewModel.existingParticipants.count * 44))
                 .listStyle(.plain)
                 .scrollDisabled(true)
-//                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
     }
 
     var participantList: some View {
         ParticipantListView(
-            participantViewModel: participantViewModel,
+            participants: $participantViewModel.participants,
+            isDuplicate: { participantViewModel.isNameDuplicated(at: $0) },
+            onSubmit: handleSubmitField,
+            onDelete: participantViewModel.removeParticipant(at:),
+            onAdd: {
+                participantViewModel.addParticipant()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    if let last = participantViewModel.participants.last {
+                        focusedId = last.id
+                        scrollTarget = last.id
+                    }
+                }
+            },
             focusedId: $focusedId,
             scrollTarget: $scrollTarget,
             lastFocusedId: $lastFocusedId
@@ -148,14 +142,20 @@ private extension UpdateParticipantView {
             return ""
         }
     }
-
     
+    func handleSubmitField(index: Int, participant: Participant) {
+        let trimmed = participant.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            participantViewModel.removeParticipant(at: index)
+        } else if let nextId = participantViewModel.nextId(after: participant.id) {
+            focusedId = nextId
+            scrollTarget = nextId
+        }
+    }
+
     func handleSubmit() {
         switch participantViewModel.validateSubmission() {
         case .valid:
-            print("💾 기존 인원: \(roleViewModel.participants.map { $0.name })")
-            print("➕ 추가 인원: \(participantViewModel.participants.map { $0.name })")
-
             roleViewModel.assignRolesToNewParticipants(participantViewModel.participants)
 
             let newAssigned = roleViewModel.participants.filter { new in
@@ -169,6 +169,7 @@ private extension UpdateParticipantView {
         }
     }
 }
+
 
 #Preview {
     UpdateParticipantPreviewWrapper()

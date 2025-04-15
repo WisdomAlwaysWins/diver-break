@@ -14,24 +14,28 @@ import SwiftUI
 */
 
 struct ParticipantListSectionView: View {
-    
-    @ObservedObject var participantViewModel: ParticipantViewModel
-    
-    var focusedId: FocusState<UUID?>.Binding // 포커스 상태 바인딩 (각 셀의 TextField 포커스 관리용)
+    @Binding var participants: [Participant]
+    var isDuplicate: (Int) -> Bool
     var onSubmit: (Int, Participant) -> Void
+    var onDelete: (Int) -> Void
+
+    var focusedId: FocusState<UUID?>.Binding
 
     var body: some View {
-        ForEach(Array(participantViewModel.participants.enumerated()), id: \.1.id) { index, participant in
+        ForEach($participants.indices, id: \.self) { index in
             ParticipantCellView(
-                participantViewModel: participantViewModel,
+                participant: $participants[index],
                 index: index,
+                isDuplicate: isDuplicate(index),
                 onSubmit: {
-                    onSubmit(index, participantViewModel.participants[index])
+                    onSubmit(index, participants[index])
                 },
-                focusedId: focusedId,
-                id: participant.id
+                onDelete: {
+                    onDelete(index)
+                },
+                focusedId: focusedId
             )
-            .id(participant.id)
+            .id(participants[index].id)
             .listRowBackground(Color.clear)
         }
     }
@@ -39,28 +43,31 @@ struct ParticipantListSectionView: View {
 
 #Preview {
     struct ParticipantListSectionPreviewWrapper: View {
-        @StateObject private var viewModel = ParticipantViewModel(
-            participants: [
-                Participant(name: "HappyJay"),
-                Participant(name: "Gigi"),
-                Participant(name: "Moo")
-            ],
-            mode: .input
-        )
-
+        @State private var participants: [Participant] = [
+            Participant(name: "HappyJay"),
+            Participant(name: "Gigi"),
+            Participant(name: "Moo")
+        ]
         @FocusState private var focusedId: UUID?
 
         var body: some View {
             List {
                 ParticipantListSectionView(
-                    participantViewModel: viewModel,
-                    focusedId: $focusedId,
+                    participants: $participants,
+                    isDuplicate: { index in
+                        let name = participants[index].trimmedName
+                        guard !name.isEmpty else { return false }
+                        return participants.filter { $0.trimmedName == name }.count > 1
+                    },
                     onSubmit: { index, participant in
                         print("✅ Submitted: \(participant.name) at index \(index)")
-                    }
+                    },
+                    onDelete: { index in
+                        participants.remove(at: index)
+                    },
+                    focusedId: $focusedId
                 )
             }
-            .listStyle(.plain)
         }
     }
 

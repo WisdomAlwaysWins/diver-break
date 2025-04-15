@@ -15,7 +15,7 @@ import SwiftUI
 
 struct ParticipantInputListView: View {
     @EnvironmentObject var pathModel: PathModel
-    @StateObject private var participantViewModel = ParticipantViewModel(mode : .input)
+    @StateObject private var participantViewModel = ParticipantViewModel(mode: .input)
     @StateObject private var roleViewModel = RoleAssignmentViewModel()
 
     @FocusState private var focusedId: UUID?
@@ -108,7 +108,11 @@ private extension ParticipantInputListView {
     // List 기반 입력 영역
     var participantList: some View {
         ParticipantListView(
-            participantViewModel: participantViewModel,
+            participants: $participantViewModel.participants,
+            isDuplicate: { participantViewModel.isNameDuplicated(at: $0) },
+            onSubmit: handleSubmit,
+            onDelete: participantViewModel.removeParticipant,
+            onAdd: addParticipant,
             focusedId: $focusedId,
             scrollTarget: $scrollTarget,
             lastFocusedId: $lastFocusedId

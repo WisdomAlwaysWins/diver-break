@@ -14,33 +14,38 @@ import SwiftUI
 */
 
 struct ParticipantListView: View {
-    
-    @ObservedObject var participantViewModel : ParticipantViewModel
-
-    var focusedId: FocusState<UUID?>.Binding // 스크롤 상태 관리
-    @Binding var scrollTarget: UUID? // 자동 스크롤 대상 ID
-    @Binding var lastFocusedId: UUID? // 마지막 포커스 ID (포커스 해제 후 비어있는 셀 정리용)
+    @Binding var participants: [Participant]
+    let isDuplicate: (Int) -> Bool
+    let onSubmit: (Int, Participant) -> Void
+    let onDelete: (Int) -> Void
+    let onAdd: () -> Void
+    let focusedId: FocusState<UUID?>.Binding
+    let scrollTarget: Binding<UUID?>
+    let lastFocusedId: Binding<UUID?>
 
     var body: some View {
-        ScrollViewReader { proxy in // 내부 스크롤 뷰의 각 항목을 고유 ID로 식별하고, 해당 ID를 기반으로 스크롤할 수 있게 해줌
+        ScrollViewReader { proxy in
             List {
                 Section(header: participantCountHeader) {
-                    ParticipantListSectionView( // 참가자 리스트 섹션
-                        participantViewModel: participantViewModel,
-                        focusedId: focusedId,
-                        onSubmit: { index, participant in
-                            participantViewModel.submitParticipant(index: index, id: participant.id) { nextId in
-                                focusedId.wrappedValue = nextId
-                                scrollTarget = nextId
-                            }
-                        }
-                    )
+                    ForEach(Array(zip(participants.indices, $participants)), id: \.1.id) { index, $participant in
+                        ParticipantCellView(
+                            participant: $participant,
+                            index: index,
+                            isDuplicate: isDuplicate(index),
+                            onSubmit: {
+                                onSubmit(index, participant)
+                            },
+                            onDelete: {
+                                onDelete(index)
+                            },
+                            focusedId: focusedId
+                        )
+                        .id(participant.id)
+                        .focused(focusedId, equals: participant.id)
+                        .listRowBackground(Color.clear)
+                    }
 
-                    Button(action: {
-                        let new = participantViewModel.addParticipantAndReturn()
-                        scrollTarget = new.id
-                        focusedId.wrappedValue = new.id
-                    }) { // 참가자 추가 버튼
+                    Button(action: onAdd) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundColor(.diverBlue)
@@ -54,59 +59,80 @@ struct ParticipantListView: View {
                 }
             }
             .listStyle(.plain)
-            .scrollContentBackground(.hidden) // 리스트 배경 제거
+            .scrollContentBackground(.hidden)
             .background(Color.clear)
             .padding(.horizontal, 20)
-            .onChange(of: scrollTarget) { id in // 참가자 추가 시 자동 스크롤
+            .onChange(of: scrollTarget.wrappedValue) { id in
                 if let id = id {
                     withAnimation {
-                        proxy.scrollTo(id, anchor: .bottom) 
+                        proxy.scrollTo(id, anchor: .center)
                     }
                 }
             }
-            .onChange(of: focusedId.wrappedValue) { newValue in // 포커스 해제 시 비어있는 셀 삭제
-                if newValue == nil, let lastId = lastFocusedId {
-                    participantViewModel.removeIfEmpty(id: lastId)
+            .onChange(of: focusedId.wrappedValue) { newValue in
+                if newValue == nil, let lastId = lastFocusedId.wrappedValue {
+                    if let index = participants.firstIndex(where: { $0.id == lastId }),
+                       participants[index].trimmedName.isEmpty {
+                        onDelete(index)
+                    }
                 }
-                lastFocusedId = newValue
+                lastFocusedId.wrappedValue = newValue
             }
         }
     }
 
-    // MARK: - 참가자 수 헤더
     private var participantCountHeader: some View {
         HStack {
-            HStack(spacing: 0) {
-                Text("현재")
-                Text(" \(participantViewModel.validParticipantCount)")
-                    .foregroundColor(.diverBlue)
-                Text("명 참여")
-            }
             Spacer()
-        }.font(.subheadline)
-            .fontWeight(.medium)
-            .padding(.vertical, 4)
+            Text("현재 \(participants.filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }.count)명 참여")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.diverBlack)
+                .padding(.vertical, 4)
+        }
     }
 }
 
 #Preview {
     struct ParticipantListViewPreviewWrapper: View {
-        @StateObject private var viewModel = ParticipantViewModel(
-            participants: [
-                Participant(name: "HappyJay"),
-                Participant(name: "Gigi"),
-                Participant(name: "Moo")
-            ],
-            mode: .input
-        )
+        @State private var participants: [Participant] = [
+            Participant(name: "제이"),
+            Participant(name: "체리"),
+            Participant(name: "지지")
+        ]
 
         @FocusState private var focusedId: UUID?
-        @State private var scrollTarget: UUID? = nil
-        @State private var lastFocusedId: UUID? = nil
+        @State private var scrollTarget: UUID?
+        @State private var lastFocusedId: UUID?
 
         var body: some View {
             ParticipantListView(
-                participantViewModel: viewModel,
+                participants: $participants,
+                isDuplicate: { index in
+                    let name = participants[index].trimmedName
+                    guard !name.isEmpty else { return false }
+                    return participants.filter { $0.trimmedName == name }.count > 1
+                },
+                onSubmit: { index, participant in
+                    let trimmed = participant.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if trimmed.isEmpty {
+                        participants.remove(at: index)
+                    } else if index + 1 < participants.count {
+                        focusedId = participants[index + 1].id
+                        scrollTarget = participants[index + 1].id
+                    }
+                },
+                onDelete: { index in
+                    participants.remove(at: index)
+                },
+                onAdd: {
+                    let new = Participant()
+                    participants.append(new)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        focusedId = new.id
+                        scrollTarget = new.id
+                    }
+                },
                 focusedId: $focusedId,
                 scrollTarget: $scrollTarget,
                 lastFocusedId: $lastFocusedId
