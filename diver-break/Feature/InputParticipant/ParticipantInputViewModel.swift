@@ -22,6 +22,8 @@ enum SubmissionValidationResult { // submit validation 검사
 
 class ParticipantViewModel : ObservableObject {
     
+    //TODO: - 엉엉 ㅠㅠ trimm 어디서 해 ㅠㅠㅠㅠㅠㅠㅠ whitespace 어디서 빼 ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ 여기서 해
+    
     enum Mode {
         case input // 최소 3명 유지
         case update // 최소 1명 유지
