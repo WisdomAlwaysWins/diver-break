@@ -8,10 +8,10 @@
 import SwiftUI
 
 /*
-    MARK: - 참가자 목록 전체를 보여주는 리스트 뷰
-    - 리스트 섹션 + 새 참가자 추가 버튼
-    - 포커스 관리, 자동 스크롤, 입력된 닉네임 삭제 로직 등을 포함
-*/
+ MARK: - 참가자 목록 전체를 보여주는 리스트 뷰
+ - 리스트 섹션 + 새 참가자 추가 버튼
+ - 포커스 관리, 자동 스크롤, 입력된 닉네임 삭제 로직 등을 포함
+ */
 
 struct ParticipantListView: View {
     @Binding var participants: [Participant]
@@ -22,7 +22,7 @@ struct ParticipantListView: View {
     let focusedId: FocusState<UUID?>.Binding
     let scrollTarget: Binding<UUID?>
     let lastFocusedId: Binding<UUID?>
-
+    
     var body: some View {
         ScrollViewReader { proxy in
             List {
@@ -44,7 +44,7 @@ struct ParticipantListView: View {
                         .focused(focusedId, equals: participant.id)
                         .listRowBackground(Color.clear)
                     }
-
+                    
                     Button(action: onAdd) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
@@ -80,16 +80,21 @@ struct ParticipantListView: View {
             }
         }
     }
-
+    
     private var participantCountHeader: some View {
         HStack {
             Spacer()
-            Text("현재 \(participants.filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }.count)명 참여")
+            
+            Text("현재 \(validParticipantCount)명 참여")
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundColor(.diverBlack)
                 .padding(.vertical, 4)
         }
+    }
+    
+    private var validParticipantCount: Int {
+        participants.filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }.count
     }
 }
 
@@ -100,11 +105,11 @@ struct ParticipantListView: View {
             Participant(name: "체리"),
             Participant(name: "지지")
         ]
-
+        
         @FocusState private var focusedId: UUID?
         @State private var scrollTarget: UUID?
         @State private var lastFocusedId: UUID?
-
+        
         var body: some View {
             ParticipantListView(
                 participants: $participants,
@@ -139,6 +144,7 @@ struct ParticipantListView: View {
             )
         }
     }
-
+    
     return ParticipantListViewPreviewWrapper()
 }
+
